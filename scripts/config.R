@@ -1,14 +1,9 @@
-library(devtools)
-install_github('yfinegold/gfcanalysis')
-library(gfcanalysis)
 
-## Get List of Countries 
-(gadm_list  <- data.frame(getData('ISO3')))
-aoi_list    <- c("CAF","COD","COG","CMR","GAB","GNQ")
-
-
-gfcdwn_dir <- "/home/dannunzio/downloads/gfc_2018/"
-rootdir    <- "/home/dannunzio/cafi/"
+root <- "~" 
+setwd(root)
+root       <- paste0(getwd(),'/')
+gfcdwn_dir <- paste0(root,"downloads/gfc/2018/")
+rootdir     <- paste0(root,"gfc_wrapper/")
 scriptdir   <- paste0(rootdir,"scripts/")
 data_dir    <- paste0(rootdir,"data/")
 tmp_dir     <- paste0(rootdir,"tmp/")
@@ -23,8 +18,14 @@ dir.create(aoi_dir,showWarnings = F)
 dir.create(stt_dir,showWarnings = F)
 dir.create(tmp_dir,showWarnings = F)
 
-threshold <- 30
-max_year  <- 18
+#################### load packages
+source(paste0(scriptdir,'packages.R'))
+
+#################### load parameters
+source(paste0(scriptdir,'parameters.R'))
+
+## Get List of Countries 
+(gadm_list  <- data.frame(getData('ISO3')))
 
 #################### CREATE A COLOR TABLE FOR THE OUTPUT MAP
 my_classes <- c(0,1:max_year,30,40,50,51)
@@ -51,10 +52,7 @@ pct <- data.frame(cbind(my_classes,
 
 write.table(pct,paste0(gfc_dir,"color_table.txt"),row.names = F,col.names = F,quote = F)
 
-
 types       <- c("treecover2000","lossyear","gain","datamask")
-
-proj <- '+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs '
 
 pixel_count <- function(x){
   info    <- gdalinfo(x,hist=T)

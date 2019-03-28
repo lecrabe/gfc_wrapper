@@ -1,3 +1,4 @@
+countrycode <- aoi_list[1]
 
 ## Download data for CAFI countries 
 for(countrycode in aoi_list){
@@ -101,7 +102,7 @@ for(countrycode in aoi_list){
                    paste0(gfc_dir,"gfc_",countrycode,"_",types[4],".tif"),
                    paste0(tmp_dir,"tmp_gfc_map_",countrycode,".tif"),
 
-                   paste0("(A<=",threshold,")*30+", ### NON FOREST
+                   paste0("(A<=",threshold,")*((C==1)*50 + (C==0)*30)+", ### NON FOREST
                           "(A>", threshold,")*",
                           "((C==1)*(",
                           "(B>0)*  51 +",           ### GAIN+LOSS
@@ -152,11 +153,6 @@ for(countrycode in aoi_list){
     ###############################################################################
     ################### COMPUTE AREAS
     ###############################################################################
-    system(sprintf("oft-stat -i %s -o %s ",
-                   paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.tif"),
-                   paste0(stt_dir,"stats_",countrycode,"_",threshold,".txt")
-    ))
-    
     hist <- pixel_count(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.tif"))
     write.table(hist,paste0(stt_dir,"stats_",countrycode,"_",threshold,".txt"),row.names = F,col.names = F)
     
@@ -168,15 +164,6 @@ for(countrycode in aoi_list){
 system(sprintf("rm -f %s",
                paste0(tmp_dir,"tmp*")))
 
-
-png(file= paste0(stt_dir,"CAFI","_",threshold,"loss_rate.png") ,
-    width= 1000,
-    height=600)
-
-par(mfrow = c(3,2))
-
-df0 <- codes <- data.frame(cbind(my_labels,my_classes))
-names(df0) <- c("classes","codes")
 
 for(countrycode in aoi_list){
   
@@ -192,19 +179,13 @@ for(countrycode in aoi_list){
   df1$area_ha <- df1$pixels*pix*pix/10000000
   df1$rate    <- round(df1$area_ha / (df1[df1$classes == "forest","area_ha"] + sum(df1[grep("loss_",df1$classes),]$area_ha)) * 100,2)
   
-  df0 <- merge(df0,df,by.x="codes",by.y="V1",all.x=T)
-  names(df0)[ncol(df0)] <- paste0("pix",countrycode)
-  df0[,paste0("area_ha_",countrycode)] <- df0[,paste0("pix",countrycode)]*pix*pix/10000000
-
-  sum(df1$area_ha)
-  
   loss <- df1[grep("loss_",df1$classes),]
  
   barplot(loss$area_ha,
           names.arg=substr(loss$classes,6,9),
-          ylab="Pertes (1000 ha)",
-          ylim=c(0,1500),
-          main=paste0("Superficie ",countrycode))
+          ylab="Area (1000 ha)",
+          # ylim=c(0,1500),
+          main=paste0("Annual loss ",countrycode))
   
   # barplot(loss$rate,
   #         names.arg=substr(loss$classes,6,9),
@@ -215,42 +196,3 @@ for(countrycode in aoi_list){
   dev.off()
 }
 
-dev.off()
-
-df0 <- arrange(df0,as.numeric(codes))
-df0 <- df0[df0$codes >0 ,]
-loss <- df0[grep("loss_",df0$classes),]
-
-l1 <- loss[,c("classes","area_ha_CAF")]
-l2 <- loss[,c("classes","area_ha_COD")]
-l3 <- loss[,c("classes","area_ha_COG")]
-l4 <- loss[,c("classes","area_ha_CMR")]
-l5 <- loss[,c("classes","area_ha_GAB")]
-l6 <- loss[,c("classes","area_ha_GNQ")]
-
-names(l1) <-  names(l2) <-  names(l3) <-  names(l4) <-  names(l5) <-  names(l6) <-  c("classes","area_ha")
-
-l1$country <- "R Centrafricaine"
-l2$country <- "R Dem Congo"
-l3$country <- "R Congo"
-l4$country <- "Cameroun"
-l5$country <- "Gabon"
-l6$country <- "Guinée Equatoriale"
-
-melt <- rbind(l1,l2,l3,l4,l5,l6)
-melt$classes <- substr(melt$classes,6,9)
-
-g <- ggplot(melt,aes(classes,area_ha,fill=country))
-
-
-png(file= paste0(stt_dir,"cafi","_",threshold,"loss_cumulated_stacked.png") ,
-    width= 1000,
-    height=400)
-
-g+
-  geom_col(position = "fill")+ #
-  scale_fill_brewer(palette = "Dark2")+
-  labs(x = "Année",
-       y = "Superficie 1000 ha")
-
-dev.off()
