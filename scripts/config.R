@@ -12,6 +12,7 @@ aoi_dir       <- paste0(data_dir,"aoi/")
 stt_dir       <- paste0(data_dir,"stat/")
 
 dir.create(scriptdir,showWarnings = F)
+dir.create(gfcdwn_dir,recursive=T,showWarnings = F)
 dir.create(data_dir,showWarnings = F)
 dir.create(gfc_dir,showWarnings = F)
 dir.create(aoi_dir,showWarnings = F)
