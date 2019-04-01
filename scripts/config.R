@@ -31,6 +31,7 @@ source(paste0(scriptdir,'parameters.R'))
 #################### CREATE A COLOR TABLE FOR THE OUTPUT MAP
 my_classes <- c(0,1:max_year,30,40,50,51)
 my_labels  <- c("no data",paste0("loss_",2000+1:max_year),"non forest","forest","gains","gains+loss")
+codes <- data.frame(cbind(my_labels,my_classes))
 
 loss_col <- colorRampPalette(c("yellow", "darkred"))
 nonf_col <- "lightgrey"
