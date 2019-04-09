@@ -78,10 +78,7 @@ shinyServer(function(input, output, session) {
   v <- reactiveValues(threshold = FALSE,
                       country   = FALSE)
   
-  threshold <- reactive({
-    v$threshold <- input$threshold
-    input$threshold
-  })
+
   
   ##################################################################################################################################
   ############### Insert the MERGE button
@@ -100,7 +97,7 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Insert the DISPLAY MAP button
   output$DisplayMapButton <- renderUI({
-    req(generate_map())
+    req(input$country_code)
     actionButton('DisplayMapButton', textOutput('display_map_button'))
   })
   
@@ -111,17 +108,36 @@ shinyServer(function(input, output, session) {
     actionButton('StatButton', textOutput('stat_button'))
   })
   
+  
+  ##################################################################################################################################
+  ############### Make the AOI reactive
+  make_aoi <- reactive({
+    req(input$country_code)
+    countrycode <- input$country_code
+    
+    source("scripts/b0_get_aoi.R",  local=T, echo = TRUE)
+    
+    v$country <- aoi_shp
+    
+  })
+  
+  threshold <- reactive({
+    v$threshold <- input$threshold
+    input$threshold
+  })
+  
   ##################################################################################################################################
   ############### DOWNLOAD DATA
   merge_tiles <- eventReactive(input$MergeButton,
                              {
                                req(input$MergeButton)
                                req(input$country_code)
+                               req(make_aoi())
                                
                                threshold   <- input$threshold
                                countrycode <- input$country_code
                                
-                               source("scripts/b1_download_merge.R",  local=T,echo = TRUE)
+                               source("scripts/b1_download_merge.R",  local=T, echo = TRUE)
                                
                                list.files(gfc_dir)
                              })
@@ -133,12 +149,13 @@ shinyServer(function(input, output, session) {
                                {
                                  req(input$MapButton)
                                  req(input$country_code)
+                                 req(make_aoi())
                                  req(merge_tiles())
                                  
                                  threshold   <- input$threshold
                                  countrycode <- input$country_code
                                  aoi_name    <- paste0(aoi_dir,'GADM_',countrycode)
-                                 aoi_shp     <- paste0(aoi_name,".shp")
+                                 aoi_shp     <- make_aoi()
                                  aoi_field   <-  "id_aoi"
                                  
                                  source("scripts/b2_make_map_threshold.R",  local=T,echo = TRUE)
@@ -149,7 +166,6 @@ shinyServer(function(input, output, session) {
   ############### Display the results as map
   output$display_res <- renderPlot({
     req(input$DisplayMapButton)
-    req(generate_map())
     
     threshold   <- input$threshold
     countrycode <- input$country_code

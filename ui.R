@@ -195,15 +195,14 @@ shinyUI(
                   box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
                       uiOutput("MergeButton"),
                       uiOutput("MapButton"),
-                      uiOutput("StatButton"),
-                      plotOutput("display_res"),
-                      tableOutput("message")
+                      uiOutput("StatButton")
                   ),
                   
                   ####################################################################################
                   # New box
                   box(title= textOutput('results'),width=6, status = "success", solidHeader= TRUE,
-                      uiOutput("DisplayMapButton")
+                      uiOutput("DisplayMapButton"),
+                      plotOutput("display_res")
                       
                       
                   )
