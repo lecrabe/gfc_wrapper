@@ -104,5 +104,6 @@ out_sd <- data.frame(sapply(c(paste("year",2000+(1:max_year),sep="_"),"total","i
 out$sampling   <- as.numeric(row.names(out))
 out_sd$sampling <- as.numeric(row.names(out_sd))
 
-write.csv(out,paste0(stt_dir,"iter_100_mean.csv"),row.names = F)
-write.csv(out_sd,paste0(stt_dir,"iter_100_sd.csv"),row.names = F)
+write.csv(master,paste0(stt_dir,"iter_",countrycode,"_100_master.csv"),row.names = F)
+write.csv(out,paste0(stt_dir,"iter_",countrycode,"_100_mean.csv"),row.names = F)
+write.csv(out_sd,paste0(stt_dir,"iter_",countrycode,"_100_sd.csv"),row.names = F)
