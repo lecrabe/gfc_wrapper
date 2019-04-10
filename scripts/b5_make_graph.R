@@ -1,6 +1,6 @@
 rel <- out
 
-for(the_col in 1:(ncol(out)-1)){
+for(the_col in c(paste("year",2000+(1:max_year),sep="_"),"total")){
   rel[,the_col] <- out[,the_col] - out[nrow(out),the_col]
 }
 
