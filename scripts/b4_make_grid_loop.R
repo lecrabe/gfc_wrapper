@@ -1,9 +1,6 @@
-nb_iter <- 100
+master <- data.frame(matrix(nrow = 0,ncol=length(output_names)))
+names(master) <- output_names
 i <- 1
-
-master <- data.frame(matrix(nrow = 0,ncol=23))
-names(master) <- c(paste("year",2000+(1:max_year),sep="_"),
-                   "total","intensity","sampling","iter","offset")
 
 aoi_proj <- spTransform(aoi,proj)
 
@@ -18,7 +15,7 @@ for(rand_off in runif(nb_iter,0,1)){
                                                       offset = c(rand_off,rand_off)
   ))
   
-
+  
   proj4string(samplepoints) <- proj4string(aoi_proj)
   pts                       <- samplepoints[aoi_proj,]
   
@@ -88,22 +85,22 @@ for(rand_off in runif(nb_iter,0,1)){
                                loss_area,
                                sum(hist[(hist$code == 40 | (hist$code > 0 & hist$code < 30)),"pixels"]),
                                0)
-  out$iter <- i
+  out$iter   <- i
   out$offset <- rand_off
   i <- i+1
   
   master <- rbind(master,out)
 }
 
-out    <- data.frame(sapply(c(paste("year",2000+(1:max_year),sep="_"),"total","intensity"),
+out_av <- data.frame(sapply(c(paste("year",2000+(1:max_year),sep="_"),"total","intensity"),
                             function(x){tapply(master[,x],master$sampling,mean)}))
 
 out_sd <- data.frame(sapply(c(paste("year",2000+(1:max_year),sep="_"),"total","intensity"),
                             function(x){tapply(master[,x],master$sampling,sd)}))
 
-out$sampling   <- as.numeric(row.names(out))
+out_av$sampling <- as.numeric(row.names(out_av))
 out_sd$sampling <- as.numeric(row.names(out_sd))
 
-write.csv(master,paste0(stt_dir,"iter_",countrycode,"_100_master.csv"),row.names = F)
-write.csv(out,paste0(stt_dir,"iter_",countrycode,"_100_mean.csv"),row.names = F)
-write.csv(out_sd,paste0(stt_dir,"iter_",countrycode,"_100_sd.csv"),row.names = F)
+write.csv(master,paste0(stt_dir,"iter_",nb_iter,"_aoi_",countrycode,"_100_master.csv"),row.names = F)
+write.csv(out_av,paste0(stt_dir,"iter_",nb_iter,"_aoi_",countrycode,"_100_mean.csv"),row.names = F)
+write.csv(out_sd,paste0(stt_dir,"iter_",nb_iter,"_aoi_",countrycode,"_100_sd.csv"),row.names = F)

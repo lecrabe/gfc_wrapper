@@ -59,6 +59,10 @@ write.table(pct,paste0(gfc_dir,"color_table.txt"),row.names = F,col.names = F,qu
 
 types       <- c("treecover2000","lossyear","gain","datamask")
 
+
+output_names <- c(paste("year",2000+(1:max_year),sep="_"),
+                  "total","intensity","sampling","iter","offset")
+
 ####################################################################################################
 ################# PIXEL COUNT FUNCTION
 pixel_count <- function(x){
