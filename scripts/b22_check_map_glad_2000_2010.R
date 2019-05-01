@@ -76,32 +76,12 @@ if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.t
                  paste0(tmp_dir,"tmp_glad_check_clip_prj_",countrycode,".tif")
   ))
   
-  #################### CREATE A COLOR TABLE FOR THE OUTPUT MAP
-  my_classes <- 0:8
-
-  my_colors  <- col2rgb(c("black",
-                          "green",
-                          "red",
-                          "yellow",
-                          "purple",
-                          "blue",
-                          "lightblue",
-                          "darkblue",
-                          "grey"))
-  
-  pct <- data.frame(cbind(my_classes,
-                          my_colors[1,],
-                          my_colors[2,],
-                          my_colors[3,]))
-  
-  write.table(pct,paste0(gfc_dir,"color_table.txt"),row.names = F,col.names = F,quote = F)
-  
   
   ################################################################################
   #################### Add pseudo color table to result
   ################################################################################
   system(sprintf("(echo %s) | oft-addpct.py %s %s",
-                 paste0(gfc_dir,"color_table.txt"),
+                 paste0(gfc_dir,"color_table_glad.txt"),
                  paste0(tmp_dir,"tmp_glad_check_clip_prj_",countrycode,".tif"),
                  paste0(tmp_dir,"tmp_glad_map_clip_prj_pct",countrycode,".tif")
   ))
