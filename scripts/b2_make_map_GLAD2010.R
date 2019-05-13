@@ -1,5 +1,5 @@
 #################### SKIP IF OUTPUTS EXISTS ALREADY
-if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.tif"))){
+#if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.tif"))){
 
   #################### ALIGN GLAD WITH GFC
   mask   <- paste0(gfc_dir,"gfc_",countrycode,"_",types[4],".tif")
@@ -63,16 +63,16 @@ if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.t
                  scriptdir,
                  aoi_shp,
                  paste0(tmp_dir,"tmp_glad_check_",countrycode,".tif"),
-                 paste0(tmp_dir,"tmp_glad_check_clip",countrycode,".tif"),
+                 paste0(tmp_dir,"tmp_glad_check_clip_",countrycode,".tif"),
                  aoi_field
   ))
   
   ###############################################################################
   ################### REPROJECT IN EA PROJECTION
   ###############################################################################
-  system(sprintf("gdalwarp -t_srs \"%s\" -overwrite -ot Byte -multi -co COMPRESS=LZW %s %s",
+  system(sprintf("gdalwarp -t_srs \"%s\" -overwrite -ot Byte -co COMPRESS=LZW %s %s",
                  proj,
-                 paste0(tmp_dir,"tmp_glad_check_clip",countrycode,".tif"),
+                 paste0(tmp_dir,"tmp_glad_check_clip_",countrycode,".tif"),
                  paste0(tmp_dir,"tmp_glad_check_clip_prj_",countrycode,".tif")
   ))
   
@@ -83,15 +83,15 @@ if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.t
   system(sprintf("(echo %s) | oft-addpct.py %s %s",
                  paste0(gfc_dir,"color_table_glad.txt"),
                  paste0(tmp_dir,"tmp_glad_check_clip_prj_",countrycode,".tif"),
-                 paste0(tmp_dir,"tmp_glad_map_clip_prj_pct",countrycode,".tif")
+                 paste0(tmp_dir,"tmp_glad_map_clip_prj_pct_",countrycode,".tif")
   ))
   
   ################################################################################
   #################### COMPRESS
   ################################################################################
   system(sprintf("gdal_translate -ot Byte -co COMPRESS=LZW %s %s",
-                 paste0(tmp_dir,"tmp_glad_map_clip_prj_pct",countrycode,".tif"),
+                 paste0(tmp_dir,"tmp_glad_map_clip_prj_pct_",countrycode,".tif"),
                  paste0(gfc_dir,"glad_check_",countrycode,"_",threshold,".tif")
   ))
   
-}
+#}

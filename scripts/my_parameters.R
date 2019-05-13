@@ -1,7 +1,7 @@
 ## parameters
 threshold   <- 30
 max_year    <- 18
-aoi_list    <- c("KHM")
+aoi_list    <- c("BIH")
 countrycode <- aoi_list[1]
 spacing     <- 1000 #0.011
 offset      <- 0.001

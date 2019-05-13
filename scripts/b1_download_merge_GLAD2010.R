@@ -40,6 +40,7 @@ for(tile in tilesx){
   )
 }
 
+
 ### MERGE THE TILES TOGETHER and CLIP TO THE BOUNDING BOX OF THE COUNTRY
 if(!file.exists(paste0(gfc_dir,"glad2010_",countrycode,".tif"))){
 
@@ -62,7 +63,7 @@ if(!file.exists(paste0(gfc_dir,"glad2010_",countrycode,".tif"))){
                  paste0(gfc_dir,"glad2010_",countrycode,".tif")
   ))
 
-  print(to_merge)
+ 
 } #### END OF EXISTS MERGE
 
 system(sprintf("rm -f -r %s",

@@ -15,7 +15,9 @@ df <- df[df$code != 0,]
 
 df$percent <- round(df$area/sum(df$area)*100,2)
 
+df <- df[,c("code","fnf_gfc_2000","fnf_glad_2010","chg_gfc","agree","pixels","area","percent")]
 tapply(df$percent,df$agree,sum)
-write.table(hist,paste0(stt_dir,"stats_",countrycode,"_",threshold,".txt"),row.names = F,col.names = F)
+
+write.csv(df,paste0(stt_dir,"stats_",countrycode,"_",threshold,".csv"),row.names = F)
 
 

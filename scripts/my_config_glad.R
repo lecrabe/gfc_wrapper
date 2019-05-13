@@ -10,6 +10,7 @@ tmp_dir     <- paste0(rootdir,"tmp/")
 gfc_dir       <- paste0(data_dir,"gfc/")
 aoi_dir       <- paste0(data_dir,"aoi/")
 stt_dir       <- paste0(data_dir,"stat/")
+tan_dir       <- paste0(data_dir,"tandem/")
 
 dir.create(scriptdir,showWarnings = F)
 dir.create(gfcdwn_dir,recursive=T,showWarnings = F)
@@ -18,7 +19,7 @@ dir.create(gfc_dir,showWarnings = F)
 dir.create(aoi_dir,showWarnings = F)
 dir.create(stt_dir,showWarnings = F)
 dir.create(tmp_dir,showWarnings = F)
-
+dir.create(tan_dir,showWarnings = F)
 ####################################################################################################
 #################### load packages
 source(paste0(scriptdir,'packages.R'))
@@ -60,6 +61,21 @@ pct <- data.frame(cbind(my_classes,
                         my_colors[3,]))
 
 write.table(pct,paste0(gfc_dir,"color_table_glad.txt"),row.names = F,col.names = F,quote = F)
+
+#################### CREATE A COLOR TABLE FOR THE OUTPUT MAP
+my_classes <- 0:3
+
+my_colors  <- col2rgb(c("black",
+                        "green",
+                        "grey",
+                        "darkblue"))
+
+pct <- data.frame(cbind(my_classes,
+                        my_colors[1,],
+                        my_colors[2,],
+                        my_colors[3,]))
+
+write.table(pct,paste0(gfc_dir,"color_table_tandem.txt"),row.names = F,col.names = F,quote = F)
 
 types       <- c("treecover2000","lossyear","gain","datamask")
 
