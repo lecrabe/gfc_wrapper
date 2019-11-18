@@ -1,15 +1,14 @@
 ####################################################################################################
-root <- "~" 
-setwd(root)
-root       <- paste0(getwd(),'/')
-gfcdwn_dir <- paste0(root,"downloads/gfc/2018/")
-rootdir     <- paste0(root,"gfc_wrapper/")
-scriptdir   <- paste0(rootdir,"scripts/")
-data_dir    <- paste0(rootdir,"data/")
-tmp_dir     <- paste0(rootdir,"tmp/")
-gfc_dir       <- paste0(data_dir,"gfc/")
-aoi_dir       <- paste0(data_dir,"aoi/")
-stt_dir       <- paste0(data_dir,"stat/")
+gfcdwn_dir <- paste0(normalizePath("~"),"/downloads/gfc/2018/")
+
+rootdir    <- paste0(normalizePath("~"),"/gfc_wrapper/")
+
+scriptdir  <- paste0(rootdir,"scripts/")
+data_dir   <- paste0(rootdir,"data/")
+tmp_dir    <- paste0(rootdir,"tmp/")
+gfc_dir    <- paste0(data_dir,"gfc/")
+aoi_dir    <- paste0(data_dir,"aoi/")
+stt_dir    <- paste0(data_dir,"stat/")
 
 dir.create(scriptdir,showWarnings = F)
 dir.create(gfcdwn_dir,recursive=T,showWarnings = F)
