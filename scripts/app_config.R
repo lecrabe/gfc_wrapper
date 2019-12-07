@@ -1,6 +1,6 @@
 ####################################################################################################
 
-gfcdwn_dir <- paste0("~/downloads/gfc/2018/")
+gfcdwn_dir <- paste0(normalizePath("~"),"/downloads/gfc/2018/")
 rootdir    <- paste0(normalizePath("~"),"/gfc_wrapper/")
 
 scriptdir   <- paste0(rootdir,"scripts/")
@@ -50,7 +50,7 @@ my_labels  <- c("no data",
                 "gains+loss")
 
 codes      <- data.frame(cbind(my_labels,my_classes))
-
+#countrycode <- "custom"
 
 #################### CREATE A COLOR TABLE FOR THE OUTPUT MAP
 loss_col <- colorRampPalette(c("yellow", "darkred"))

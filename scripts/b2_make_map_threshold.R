@@ -1,6 +1,8 @@
 #################### SKIP IF OUTPUTS EXISTS ALREADY
 if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.tif"))){
   
+  system(sprintf("rm -f %s",
+                 paste0(tmp_dir,"tmp_gfc_map_",countrycode,".tif")))
   #################### COMBINATION INTO NATIONAL SCALE MAP
   system(sprintf("gdal_calc.py -A %s -B %s -C %s -D %s --co COMPRESS=LZW --outfile=%s --calc=\"%s\"",
                  paste0(gfc_dir,"gfc_",countrycode,"_",types[1],".tif"),

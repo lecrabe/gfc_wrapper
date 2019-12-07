@@ -7,7 +7,7 @@
 
 
 ############################ TITLES
-output$title    <- reactive({  "Stratified estimator" })
+output$title    <- reactive({  "Base forest map" })
 
 output$t0_title <- reactive({  "Introduction" })
 output$t1_title <- reactive({  "Map input" })
@@ -35,7 +35,7 @@ output$t6_b1_button        <- reactive({"Generate sampling points"})
 
 output$text_choice_country        <- reactive({'Choose country name'})
 output$text_choice_threshold      <- reactive({'Choose canopy cover threshold'})
-output$merge_button             <- reactive({"Download GFC data, merge tiles and clip to boundaries"})
+output$process_button             <- reactive({"Download GFC data, merge tiles, clip to boundaries, generate map"})
 output$map_button               <- reactive({"Generate map"})
 output$display_map_button       <- reactive({"Display map"})
 output$stat_button              <- reactive({"Compute pixel counts"})

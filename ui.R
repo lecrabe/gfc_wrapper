@@ -80,23 +80,29 @@ shinyUI(
                       'language','',choices = c("English")),
                     uiOutput("chosen_language")
                   ),
-                  
+                  # 
                   ####################################################################################
                   # New box
                   box(
-                    title= textOutput('title_description'), width=6,status = "success", solidHeader= TRUE,
+                    title= textOutput('title_description'), width=9,status = "success", solidHeader= TRUE,
                     htmlOutput('body_description'),
                     
-                    selectizeInput(
-                        'country_code',
-                      textOutput('text_choice_country'),
-                      choices = setNames(getData('ISO3')[,1], 
-                                         getData('ISO3')[,2]),
-                      options = list(
-                        placeholder = '',#Please select a country from the list below',#htmlOutput('t6_b2_button1_field'),
-                        onInitialize = I('function() { this.setValue(""); }')
-                      )
-                    ),
+                    # selectizeInput(
+                    #     'country_code',
+                    #   textOutput('text_choice_country'),
+                    #   choices = setNames(getData('ISO3')[,1], 
+                    #                      getData('ISO3')[,2]),
+                    #   options = list(
+                    #     placeholder = '',#Please select a country from the list below',#htmlOutput('t6_b2_button1_field'),
+                    #     onInitialize = I('function() { this.setValue(""); }')
+                    #   )
+                    # ),
+                    shinyFilesButton(id = 'aoi_file',
+                                     label = "Area of interest",  #htmlOutput('t2_b1_button'), TO TRY TO IMPLEMENT
+                                     title = "Browse", #htmlOutput('select_a_file'),
+                                     multiple = FALSE),
+                    
+                    textOutput('filepath'),
                     
                     sliderInput('threshold',
                                 textOutput('text_choice_threshold'),
@@ -106,14 +112,15 @@ shinyUI(
                                 value=30
                                 )
                     
-                  ),
-                  
-                  # ###################################################################################
-                  # #New boxanother
-                  box(
-                    title= textOutput('another'), width=3,status = "success", solidHeader= TRUE,
-                    htmlOutput('dfg')
                   )
+                  # ,
+                  # 
+                  # # ###################################################################################
+                  # # #New boxanother
+                  # box(
+                  #   title= textOutput('another'), width=3,status = "success", solidHeader= TRUE,
+                  #   htmlOutput('dfg')
+                  # )
                   
                   # ,
                   # ###################################################################################
@@ -130,71 +137,70 @@ shinyUI(
                 ####################################################################################
                 # End of the fluid row
                 
-                fluidRow(
-                  ####################################################################################
-                  # New box
-                  box(title= textOutput('title_ts_dir'),width=6, status = "success", solidHeader= TRUE,
-                      #htmlOutput('body_ts_dir'),
-                      #br(),
-                      
-                      textOutput('filepath')
-                  ),
-                  
-                  ####################################################################################
-                  # New box
-                  box(title= textOutput('title_opt_dir'),width=6, status = "success", solidHeader= TRUE,
-                      htmlOutput('body_opt_dir')
-                      # selectInput(inputId = 'option_graph_type',
-                      #             label = textOutput('label_option_graph_type'),
-                      #             choices = c("Color overlap","BW separated","Cross-correlation"),
-                      #             multiple = FALSE,
-                      #             selected = "Color overlap"
-                      # )
-                      # 
-                      # ,
-                      # selectInput(inputId = 'option_frequency',
-                      #             label = textOutput('label_option_aggregation'),
-                      #             choices = c("Monthly","Weekly","Daily","10 minutes"),
-                      #             multiple = FALSE,
-                      #             selected = "10 minutes"
-                      # )
-                      
-                      # ,
-                      # selectInput(inputId = 'option_Transition',
-                      #             label = "Transition Core - Loop/Bridge",
-                      #             choices = c(0,1),
-                      #             multiple = FALSE,
-                      #             selected = 1
-                      # )
-                      
-                      #,
-                      # selectInput(inputId = 'option_Intext',
-                      #             label = "Separate internal from external features ?",
-                      #             choices = c(0,1),
-                      #             multiple = FALSE,
-                      #             selected = 1
-                      # )
-                      
-                      #,
-                      # selectInput(inputId = 'option_dostats',
-                      #             label = "Compute statistics ?",
-                      #             choices = c(0,1),
-                      #             multiple = FALSE,
-                      #             selected = 1
-                      # )
-                       
-                  )
-                  
-                ),
-                ####################################################################################
-                # End of the fluid row
+                # fluidRow(
+                #   ####################################################################################
+                #   # New box
+                #   box(title= textOutput('title_ts_dir'),width=6, status = "success", solidHeader= TRUE,
+                #       #htmlOutput('body_ts_dir'),
+                #       #br(),
+                #       
+                #       textOutput('filepath')
+                #   ),
+                #   
+                #   ####################################################################################
+                #   # New box
+                #   box(title= textOutput('title_opt_dir'),width=6, status = "success", solidHeader= TRUE,
+                #       htmlOutput('body_opt_dir')
+                #       # selectInput(inputId = 'option_graph_type',
+                #       #             label = textOutput('label_option_graph_type'),
+                #       #             choices = c("Color overlap","BW separated","Cross-correlation"),
+                #       #             multiple = FALSE,
+                #       #             selected = "Color overlap"
+                #       # )
+                #       # 
+                #       # ,
+                #       # selectInput(inputId = 'option_frequency',
+                #       #             label = textOutput('label_option_aggregation'),
+                #       #             choices = c("Monthly","Weekly","Daily","10 minutes"),
+                #       #             multiple = FALSE,
+                #       #             selected = "10 minutes"
+                #       # )
+                #       
+                #       # ,
+                #       # selectInput(inputId = 'option_Transition',
+                #       #             label = "Transition Core - Loop/Bridge",
+                #       #             choices = c(0,1),
+                #       #             multiple = FALSE,
+                #       #             selected = 1
+                #       # )
+                #       
+                #       #,
+                #       # selectInput(inputId = 'option_Intext',
+                #       #             label = "Separate internal from external features ?",
+                #       #             choices = c(0,1),
+                #       #             multiple = FALSE,
+                #       #             selected = 1
+                #       # )
+                #       
+                #       #,
+                #       # selectInput(inputId = 'option_dostats',
+                #       #             label = "Compute statistics ?",
+                #       #             choices = c(0,1),
+                #       #             multiple = FALSE,
+                #       #             selected = 1
+                #       # )
+                #        
+                #   )
+                #   
+                # ),
+                # ####################################################################################
+                # # End of the fluid row
                 
                 fluidRow(
                   ####################################################################################
                   # New box
                   box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
-                      uiOutput("MergeButton"),
-                      uiOutput("MapButton"),
+                      uiOutput("ProcessButton"),
                       uiOutput("StatButton")
                   ),
                   

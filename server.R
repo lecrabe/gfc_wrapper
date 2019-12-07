@@ -79,32 +79,64 @@ shinyServer(function(input, output, session) {
                       country   = FALSE)
   
 
+  ##################################################################################################################################
+  ############### Select input file 
+  shinyFileChoose(
+    input,
+    'aoi_file',
+    filetype = c(
+      'shp',
+      'sqlite',
+      'gdb',
+      'kml'
+    ),
+    roots = volumes,
+    session = session,
+    restrictions = system.file(package = 'base')
+  )
+  
+  ################################# Display the file path
+  aoi_file_path <- reactive({
+    validate(need(input$aoi_file, "Missing input: Please select the zone file"))
+    df <- parseFilePaths(volumes, input$aoi_file)
+    file_path <- as.character(df[, "datapath"])
+    nofile <- as.character("No file selected")
+    if (is.null(file_path)) {
+      cat(nofile)
+    } else{
+      cat(file_path)
+    }
+    file_path
+  })
   
   ##################################################################################################################################
-  ############### Insert the MERGE button
-  output$MergeButton <- renderUI({
+  ############### DISPLAY THE AOI FILE PATH
+  output$filepath <- renderText({
+    req(input$aoi_file)
+    aoi_file_path()
+  })
+  
+  
+  ##################################################################################################################################
+  ############### Insert the START button
+  output$ProcessButton <- renderUI({
+    req(input$aoi_file)
+    actionButton('ProcessButton', textOutput('process_button'))
+  })
+  
 
-    actionButton('MergeButton', textOutput('merge_button'))
-  })
-  
-  ##################################################################################################################################
-  ############### Insert the MAP button
-  output$MapButton <- renderUI({
-    req(merge_tiles())
-    actionButton('MapButton', textOutput('map_button'))
-  })
-  
   ##################################################################################################################################
   ############### Insert the DISPLAY MAP button
   output$DisplayMapButton <- renderUI({
-    req(input$country_code)
+    req(input$aoi_file)
     actionButton('DisplayMapButton', textOutput('display_map_button'))
   })
+  
   
   ##################################################################################################################################
   ############### Insert the STATISTICS button
   output$StatButton <- renderUI({
-    req(merge_tiles())
+    req(process())
     actionButton('StatButton', textOutput('stat_button'))
   })
   
@@ -112,64 +144,62 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Make the AOI reactive
   make_aoi <- reactive({
-    req(input$country_code)
-    countrycode <- input$country_code
+    req(input$aoi_file)
     
-    source("scripts/b0_get_aoi.R",  local=T, echo = TRUE)
+    aoi_file_path <- aoi_file_path()
+    
+    base        <- basename(as.character(aoi_file_path))
+    countrycode <- substr(base,1,nchar(base)-4)
+    
+    source("scripts/b0_custom_aoi_app.R",  local=T, echo = TRUE)
     
     v$country <- aoi_shp
     
   })
   
-  threshold <- reactive({
-    v$threshold <- input$threshold
-    input$threshold
-  })
+  # threshold <- reactive({
+  #   v$threshold <- input$threshold
+  #   input$threshold
+  # })
   
   ##################################################################################################################################
   ############### DOWNLOAD DATA
-  merge_tiles <- eventReactive(input$MergeButton,
+  process <- eventReactive(input$ProcessButton,
                              {
-                               req(input$MergeButton)
-                               req(input$country_code)
+                               req(input$ProcessButton)
+                               req(input$aoi_file)
+                               
                                req(make_aoi())
                                
                                threshold   <- input$threshold
-                               countrycode <- input$country_code
+                               base        <- basename(as.character(aoi_file_path()))
+                               countrycode <- substr(base,1,nchar(base)-4)
+                               
+                               aoi_name   <- paste0(aoi_dir,"aoi_",countrycode)
+                               aoi_shp    <- paste0(aoi_name,".shp")
+                               aoi_field <-  "id_aoi"
+                               
+                               aoi <- readOGR(make_aoi())
+                               (bb    <- extent(aoi))
                                
                                source("scripts/b1_download_merge.R",  local=T, echo = TRUE)
+                               source("scripts/b2_make_map_threshold.R",  local=T,echo = TRUE)
+                               source("scripts/b3_compute_areas.R",  local=T,echo = TRUE)
+                               source("scripts/b4_make_mspa_ready_mask.R",  local=T,echo = TRUE)
                                
                                list.files(gfc_dir)
                              })
   
 
-  ##################################################################################################################################
-  ############### DOWNLOAD DATA
-  generate_map <- eventReactive(input$MapButton,
-                               {
-                                 req(input$MapButton)
-                                 req(input$country_code)
-                                 req(make_aoi())
-                                 req(merge_tiles())
-                                 
-                                 threshold   <- input$threshold
-                                 countrycode <- input$country_code
-                                 aoi_name    <- paste0(aoi_dir,'GADM_',countrycode)
-                                 aoi_shp     <- make_aoi()
-                                 aoi_field   <-  "id_aoi"
-                                 
-                                 source("scripts/b2_make_map_threshold.R",  local=T,echo = TRUE)
-                                  
-                                 paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.tif")
-                               })
-  
+
   ############### Display the results as map
   output$display_res <- renderPlot({
     req(input$DisplayMapButton)
-    
-    threshold   <- input$threshold
-    countrycode <- input$country_code
 
+    threshold   <- input$threshold
+    base        <- basename(as.character(aoi_file_path()))
+    countrycode <- substr(base,1,nchar(base)-4)
+    
     print('Check: Display the map')
     
     plot(raster(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.tif")))

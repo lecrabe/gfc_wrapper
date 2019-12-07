@@ -11,7 +11,7 @@ the_plot <- ggplot(out_col,aes(x=intensity,
                                y=value,
                                group=variable))+
   geom_line(aes(colour=variable))+
-  ylim(-0.0000001,.0000001)+
+  #ylim(-0.0000001,.0000001)+
   
   labs(list(
     title=countrycode,
