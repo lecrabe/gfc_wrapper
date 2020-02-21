@@ -33,6 +33,7 @@ output$t3_b1_button        <- reactive({'Area calculation and legend generation'
 output$t3_b3_button        <- reactive({"Submit legend"})
 output$t6_b1_button        <- reactive({"Generate sampling points"})
 
+output$aoi_type_choice        <- reactive({'Your AOI is:'})
 output$text_choice_country        <- reactive({'Choose country name'})
 output$text_choice_threshold      <- reactive({'Choose canopy cover threshold'})
 output$process_button             <- reactive({"Download GFC data, merge tiles, clip to boundaries, generate map"})

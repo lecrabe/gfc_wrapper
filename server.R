@@ -72,18 +72,52 @@ shinyServer(function(input, output, session) {
   
   my_zip_tools <- Sys.getenv("R_ZIPCMD", "zip")
   
-
+  
   ##################################################################################################################################
   ############### GET A REACTIVE VALUE
   v <- reactiveValues(threshold = FALSE,
                       country   = FALSE)
   
-
+  
+  ##################################################################################################################################
+  ############### Insert the Customized AOI button
+  output$aoi_select_custom <- renderUI({
+    req(input$aoi_type == "custom")
+    
+    shinyFilesButton(id = 'aoi_custom_file',
+                     label = "Area of interest",  #htmlOutput('t2_b1_button'), TO TRY TO IMPLEMENT
+                     title = "Browse", #htmlOutput('select_a_file'),
+                     multiple = FALSE)
+    
+    
+    
+  })
+  
+  ##################################################################################################################################
+  ############### Insert the GADM AOI button
+  
+  
+  output$aoi_select_gadm <- renderUI({
+    req(input$aoi_type == "gadm")
+    
+    selectizeInput(
+      'country_code',
+      textOutput('text_choice_country'),
+      choices = setNames(getData('ISO3')[,1],
+                         getData('ISO3')[,2]),
+      options = list(
+        placeholder = '',#Please select a country from the list below',#htmlOutput('t6_b2_button1_field'),
+        onInitialize = I('function() { this.setValue(""); }')
+      )
+    )
+  })
+  
+  
   ##################################################################################################################################
   ############### Select input file 
   shinyFileChoose(
     input,
-    'aoi_file',
+    'aoi_custom_file',
     filetype = c(
       'shp',
       'sqlite',
@@ -95,24 +129,42 @@ shinyServer(function(input, output, session) {
     restrictions = system.file(package = 'base')
   )
   
+  # aoi_file <- reactive({
+  #   req(input$aoi_type)
+  #   
+  #   if(input$aoi_type == "GADM country boundaries"){
+  #     aoi_file <- "gadm"
+  #   }
+  # })
+  
   ################################# Display the file path
   aoi_file_path <- reactive({
-    validate(need(input$aoi_file, "Missing input: Please select the zone file"))
-    df <- parseFilePaths(volumes, input$aoi_file)
-    file_path <- as.character(df[, "datapath"])
-    nofile <- as.character("No file selected")
-    if (is.null(file_path)) {
-      cat(nofile)
-    } else{
-      cat(file_path)
+    req(input$aoi_type)
+    
+    if(input$aoi_type == "custom"){
+      validate(need(input$aoi_custom_file, "Missing input: Please select the AOI file"))
+      df <- parseFilePaths(volumes, input$aoi_custom_file)
+      file_path <- as.character(df[, "datapath"])
+      nofile <- as.character("No file selected")
+      if (is.null(file_path)) {
+        cat(nofile)
+      } else{
+        cat(file_path)
+      }
+      
     }
+    if(input$aoi_type == "gadm"){
+      file_path <- input$country_code
+    }
+    
     file_path
+    
   })
   
   ##################################################################################################################################
   ############### DISPLAY THE AOI FILE PATH
   output$filepath <- renderText({
-    req(input$aoi_file)
+    req(input$aoi_type)
     aoi_file_path()
   })
   
@@ -120,15 +172,15 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Insert the START button
   output$ProcessButton <- renderUI({
-    req(input$aoi_file)
+    req(input$aoi_type)
     actionButton('ProcessButton', textOutput('process_button'))
   })
   
-
+  
   ##################################################################################################################################
   ############### Insert the DISPLAY MAP button
   output$DisplayMapButton <- renderUI({
-    req(input$aoi_file)
+    req(input$aoi_type)
     actionButton('DisplayMapButton', textOutput('display_map_button'))
   })
   
@@ -137,21 +189,32 @@ shinyServer(function(input, output, session) {
   ############### Insert the STATISTICS button
   output$StatButton <- renderUI({
     req(process())
-    actionButton('StatButton', textOutput('stat_button'))
+    actionButton('StatsCalc', textOutput('stat_button'))
   })
   
   
   ##################################################################################################################################
   ############### Make the AOI reactive
   make_aoi <- reactive({
-    req(input$aoi_file)
+    req(input$aoi_type)
     
-    aoi_file_path <- aoi_file_path()
+    if(input$aoi_type == "custom"){
+      
+      aoi_file_path <- aoi_file_path()
+      
+      base        <- basename(as.character(aoi_file_path))
+      countrycode <- substr(base,1,nchar(base)-4)
+      
+      source("scripts/b0_custom_aoi_app.R",  local=T, echo = TRUE)
+    }
     
-    base        <- basename(as.character(aoi_file_path))
-    countrycode <- substr(base,1,nchar(base)-4)
-    
-    source("scripts/b0_custom_aoi_app.R",  local=T, echo = TRUE)
+    if(input$aoi_type == "gadm"){
+      
+      countrycode <- input$country_code
+      
+      source("scripts/b0_gadm_aoi_app.R",  local=T, echo = TRUE)
+      
+    }
     
     v$country <- aoi_shp
     
@@ -163,42 +226,75 @@ shinyServer(function(input, output, session) {
   # })
   
   ##################################################################################################################################
+  ############### GET THE BASENAME
+  countrycode <- reactive({
+    req(input$aoi_type)
+    
+    if(input$aoi_type == "custom"){
+      aoi_file_path <- aoi_file_path()
+      base          <- basename(as.character(aoi_file_path))
+      countrycode   <- substr(base,1,nchar(base)-4)
+    }
+    
+    if(input$aoi_type == "gadm"){
+      countrycode   <- input$country_code
+    }
+    countrycode
+  })
+  
+  
+  ##################################################################################################################################
   ############### DOWNLOAD DATA
   process <- eventReactive(input$ProcessButton,
-                             {
-                               req(input$ProcessButton)
-                               req(input$aoi_file)
-                               
-                               req(make_aoi())
-                               
-                               threshold   <- input$threshold
-                               base        <- basename(as.character(aoi_file_path()))
-                               countrycode <- substr(base,1,nchar(base)-4)
-                               
-                               aoi_name   <- paste0(aoi_dir,"aoi_",countrycode)
-                               aoi_shp    <- paste0(aoi_name,".shp")
-                               aoi_field <-  "id_aoi"
-                               
-                               aoi <- readOGR(make_aoi())
-                               (bb    <- extent(aoi))
-                               
-                               source("scripts/b1_download_merge.R",  local=T, echo = TRUE)
-                               source("scripts/b2_make_map_threshold.R",  local=T,echo = TRUE)
-                               source("scripts/b3_compute_areas.R",  local=T,echo = TRUE)
-                               source("scripts/b4_make_mspa_ready_mask.R",  local=T,echo = TRUE)
-                               
-                               list.files(gfc_dir)
-                             })
+                           {
+                             req(input$ProcessButton)
+                             req(input$aoi_type)
+                             
+                             req(make_aoi())
+                             
+                             threshold   <- input$threshold
+                             countrycode <- countrycode()
+                             
+                             
+                             aoi_name   <- paste0(aoi_dir,"aoi_",countrycode)
+                             aoi_shp    <- paste0(aoi_name,".shp")
+                             aoi_field <-  "id_aoi"
+                             
+                             aoi <- readOGR(make_aoi())
+                             (bb    <- extent(aoi))
+                             
+                             source("scripts/b1_download_merge.R",  local=T, echo = TRUE)
+                             print("DOWNLOADED DATA")
+                             source("scripts/b2_make_map_threshold.R",  local=T,echo = TRUE)
+                             print("GENERATED MAP")
+                             source("scripts/b3_compute_areas.R",  local=T,echo = TRUE)
+                             print("CREATED STATS")
+                             #source("scripts/b4_make_mspa_ready_mask.R",  local=T,echo = TRUE)
+                             print("GENERATED MSPA MASK")
+                             
+                             list.files(gfc_dir)
+                           })
   
-
-
+  
+  ############### Display the STATS
+  output$display_stats <- renderTable({
+    req(input$StatsCalc)
+    
+    threshold   <- input$threshold
+    countrycode <- countrycode()
+    
+    print('Check: Display the stats')
+    
+    read.table(paste0(stt_dir,"stats_",countrycode,"_",threshold,".txt"))
+    
+  })
+  
   ############### Display the results as map
   output$display_res <- renderPlot({
     req(input$DisplayMapButton)
-
+    
     threshold   <- input$threshold
-    base        <- basename(as.character(aoi_file_path()))
-    countrycode <- substr(base,1,nchar(base)-4)
+    countrycode <- countrycode()
     
     print('Check: Display the map')
     

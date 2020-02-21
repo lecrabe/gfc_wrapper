@@ -87,20 +87,15 @@ shinyUI(
                     title= textOutput('title_description'), width=9,status = "success", solidHeader= TRUE,
                     htmlOutput('body_description'),
                     
-                    # selectizeInput(
-                    #     'country_code',
-                    #   textOutput('text_choice_country'),
-                    #   choices = setNames(getData('ISO3')[,1], 
-                    #                      getData('ISO3')[,2]),
-                    #   options = list(
-                    #     placeholder = '',#Please select a country from the list below',#htmlOutput('t6_b2_button1_field'),
-                    #     onInitialize = I('function() { this.setValue(""); }')
-                    #   )
-                    # ),
-                    shinyFilesButton(id = 'aoi_file',
-                                     label = "Area of interest",  #htmlOutput('t2_b1_button'), TO TRY TO IMPLEMENT
-                                     title = "Browse", #htmlOutput('select_a_file'),
-                                     multiple = FALSE),
+                    selectInput('aoi_type',
+                                textOutput('aoi_type_choice'),
+                                choices=setNames(c("gadm","custom"), 
+                                                 c("GADM country boundaries","A customized shapefile"))
+                                ),
+                    
+                    uiOutput("aoi_select_gadm"),
+                    uiOutput("aoi_select_custom"),
+                    
                     
                     textOutput('filepath'),
                     
@@ -201,7 +196,8 @@ shinyUI(
                   # New box
                   box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
                       uiOutput("ProcessButton"),
-                      uiOutput("StatButton")
+                      uiOutput("StatButton"),
+                      tableOutput("display_stats")
                   ),
                   
                   ####################################################################################
