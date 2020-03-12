@@ -24,8 +24,7 @@ if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",threshold,"_map_clip_pct.t
   
   #############################################################
   ### CROP TO COUNTRY BOUNDARIES
-  system(sprintf("python %s/oft-cutline_crop.py -v %s -i %s -o %s -a %s",
-                 scriptdir,
+  system(sprintf("oft-cutline_crop.py -v %s -i %s -o %s -a %s",
                  aoi_shp,
                  paste0(tmp_dir,"tmp_gfc_map_",countrycode,".tif"),
                  paste0(tmp_dir,"tmp_gfc_map_clip_",countrycode,".tif"),

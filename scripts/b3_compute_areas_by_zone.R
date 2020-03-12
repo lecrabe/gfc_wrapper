@@ -26,8 +26,7 @@ system(sprintf("ogr2ogr -t_srs \"%s\" %s %s",
 
 #############################################################
 ### compute stats by zone
-system(sprintf("python %s/oft-zonal_large_list.py -um %s -i %s -o %s -a %s",
-               scriptdir,
+system(sprintf("oft-zonal_large_list.py -um %s -i %s -o %s -a %s",
                paste0(tmp_dir,"aoi_shp_proj_",countrycode,".shp"),
                map,
                paste0(tmp_dir,"tmp_stats_gfc_map_clip_",countrycode,".txt"),
