@@ -43,5 +43,6 @@ packages(plyr)
 ## Packages for graphics and interactive maps
 packages(ggplot2)
 packages(leaflet)
+packages(leaflet.extras)
 packages(RColorBrewer)
 packages(data.table)

@@ -38,7 +38,7 @@ for(type in types){
                      tilesx,
                      ".tif")
   
-  if(!file.exists(paste0(gfc_dir,"gfc_",countrycode,"_",type,".tif"))){
+  if(!file.exists(paste0(gfc_dir,"gfc_",the_basename,"_",type,".tif"))){
     
     
     system(sprintf("gdalbuildvrt -te %s %s %s %s %s %s",
@@ -56,7 +56,7 @@ for(type in types){
                    ceiling(bb@xmax),
                    floor(bb@ymin),
                    paste0(tmp_dir,"tmp_merge_",type,".vrt"),
-                   paste0(gfc_dir,"gfc_",countrycode,"_",type,".tif")
+                   paste0(gfc_dir,"gfc_",the_basename,"_",type,".tif")
     ))
     
     print(to_merge)

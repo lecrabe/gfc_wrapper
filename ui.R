@@ -15,7 +15,7 @@
 ####################################################################################
 
 ####################################################################################
-## Last update: 2019/02/19
+## Last update: 2020/03/12
 ## GFC_WRAPPER / ui
 ####################################################################################
 
@@ -48,7 +48,9 @@ shinyUI(
     dashboardSidebar(
       width = 350,
       sidebarMenu(
-        menuItem(textOutput('t0_title',inline=T), tabName = "main_tab", icon = icon("dashboard")),
+        menuItem(textOutput('t0_title',inline=T), tabName = "intro_tab", icon = icon("dashboard")),
+        menuItem(textOutput('t1_title',inline=T), tabName = "aoi_tab", icon = icon("dashboard")),
+        menuItem(textOutput('t2_title',inline=T), tabName = "mask_tab", icon = icon("dashboard")),
         hr(),
         br(),
         br(),
@@ -63,7 +65,7 @@ shinyUI(
       tabItems(
         ####################################################################################
         # New Tab
-        tabItem(tabName = "main_tab",
+        tabItem(tabName = "intro_tab",
                 fluidRow(
                   # ####################################################################################
                   # Change style of the CSS style of the tabBox, making the color green
@@ -75,145 +77,25 @@ shinyUI(
                   ####################################################################################
                   # New box
                   box(
-                    title= textOutput('title_language'), width=3,status = "success", solidHeader= TRUE,
+                    title= textOutput('t1_b0_title'), width=3,status = "success", solidHeader= TRUE,
                     selectInput(
                       'language','',choices = c("English")),
                     uiOutput("chosen_language")
                   ),
-                  # 
+                  # End of Box
+                  
                   ####################################################################################
                   # New box
                   box(
-                    title= textOutput('title_description'), width=9,status = "success", solidHeader= TRUE,
-                    htmlOutput('body_description'),
-                    
-                    selectInput('aoi_type',
-                                textOutput('aoi_type_choice'),
-                                choices=setNames(c("gadm","custom"), 
-                                                 c("GADM country boundaries","A customized shapefile"))
-                                ),
-                    
-                    uiOutput("aoi_select_gadm"),
-                    uiOutput("aoi_select_custom"),
-                    
-                    
-                    textOutput('filepath'),
-                    
-                    sliderInput('threshold',
-                                textOutput('text_choice_threshold'),
-                                min = 0,
-                                max=100,
-                                step = 5,
-                                value=30
-                                )
-                    
+                    title= textOutput('t1_b2_title'), width=9,status = "success", solidHeader= TRUE,
+                    htmlOutput('gfc_background')
                   )
-                  # ,
-                  # 
-                  # # ###################################################################################
-                  # # #New boxanother
-                  # box(
-                  #   title= textOutput('another'), width=3,status = "success", solidHeader= TRUE,
-                  #   htmlOutput('dfg')
-                  # )
-                  
-                  # ,
-                  # ###################################################################################
-                  # #New box
-                  # box(
-                  #   title= textOutput('title_download_testdata'), width=3,status = "success", solidHeader= TRUE,
-                  #   actionButton("download_test_button",
-                  #                textOutput('download_testdata_button')),
-                  #   uiOutput("dynUI_download_test")
-                  # )
-                  
+                  # End of Box
                   
                 ),
                 ####################################################################################
                 # End of the fluid row
                 
-                # fluidRow(
-                #   ####################################################################################
-                #   # New box
-                #   box(title= textOutput('title_ts_dir'),width=6, status = "success", solidHeader= TRUE,
-                #       #htmlOutput('body_ts_dir'),
-                #       #br(),
-                #       
-                #       textOutput('filepath')
-                #   ),
-                #   
-                #   ####################################################################################
-                #   # New box
-                #   box(title= textOutput('title_opt_dir'),width=6, status = "success", solidHeader= TRUE,
-                #       htmlOutput('body_opt_dir')
-                #       # selectInput(inputId = 'option_graph_type',
-                #       #             label = textOutput('label_option_graph_type'),
-                #       #             choices = c("Color overlap","BW separated","Cross-correlation"),
-                #       #             multiple = FALSE,
-                #       #             selected = "Color overlap"
-                #       # )
-                #       # 
-                #       # ,
-                #       # selectInput(inputId = 'option_frequency',
-                #       #             label = textOutput('label_option_aggregation'),
-                #       #             choices = c("Monthly","Weekly","Daily","10 minutes"),
-                #       #             multiple = FALSE,
-                #       #             selected = "10 minutes"
-                #       # )
-                #       
-                #       # ,
-                #       # selectInput(inputId = 'option_Transition',
-                #       #             label = "Transition Core - Loop/Bridge",
-                #       #             choices = c(0,1),
-                #       #             multiple = FALSE,
-                #       #             selected = 1
-                #       # )
-                #       
-                #       #,
-                #       # selectInput(inputId = 'option_Intext',
-                #       #             label = "Separate internal from external features ?",
-                #       #             choices = c(0,1),
-                #       #             multiple = FALSE,
-                #       #             selected = 1
-                #       # )
-                #       
-                #       #,
-                #       # selectInput(inputId = 'option_dostats',
-                #       #             label = "Compute statistics ?",
-                #       #             choices = c(0,1),
-                #       #             multiple = FALSE,
-                #       #             selected = 1
-                #       # )
-                #        
-                #   )
-                #   
-                # ),
-                # ####################################################################################
-                # # End of the fluid row
-                
-                fluidRow(
-                  ####################################################################################
-                  # New box
-                  box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
-                      uiOutput("ProcessButton"),
-                      uiOutput("StatButton"),
-                      tableOutput("display_stats")
-                  ),
-                  
-                  ####################################################################################
-                  # New box
-                  box(title= textOutput('results'),width=6, status = "success", solidHeader= TRUE,
-                      uiOutput("DisplayMapButton"),
-                      plotOutput("display_res")
-                      
-                      
-                  )
-                  ####################################################################################
-                  # End of the Box
-                  
-                ),
-                ####################################################################################
-                # End of the fluid row
                 
                 fluidRow(
                   ####################################################################################
@@ -235,10 +117,89 @@ shinyUI(
                 ####################################################################################
                 # End of the fluid row
                 
-        )
+        ),
         ####################################################################################
         # End of the tabItem 
         
+        ####################################################################################
+        # New Tab
+        tabItem(tabName = "aoi_tab",
+                fluidRow(
+                 
+                  ####################################################################################
+                  # New box
+                  box(
+                    title= textOutput('title_description'), width=9,status="success" , solidHeader= TRUE,
+                    htmlOutput('body_description'),
+                    
+                    selectInput('aoi_type',
+                                textOutput('aoi_type_choice'),
+                                choices=setNames(c("draw","gadm","custom"), 
+                                                 c("Draw a shape",
+                                                   "Country boundaries",
+                                                   "Select file"
+                                                 ))
+                    ),
+                    
+                    uiOutput("aoi_select_gadm"),
+                    uiOutput("aoi_select_custom"),
+                    textOutput('aoi_message_ui'),
+                    
+                    sliderInput('threshold',
+                                textOutput('text_choice_threshold'),
+                                min = 0,
+                                max=100,
+                                step = 5,
+                                value=30
+                    ),
+                    
+                    leafletOutput("leafmap")
+                    
+                  )
+                  ####################################################################################
+                  # End of the Box
+                  
+                )
+                ####################################################################################
+                # End of the fluid row
+                
+        ),
+        ####################################################################################
+        # End of the tabItem 
+        
+        
+        ####################################################################################
+        # New Tab
+        tabItem(tabName = "mask_tab",
+                
+                fluidRow(
+                  ####################################################################################
+                  # New box
+                  box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
+                      #uiOutput("ProcessButton"),
+                      uiOutput("StatButton"),
+                      tableOutput("display_stats"),
+                      plotOutput("display_loss_graph"),
+                      uiOutput("ui_download_stats")
+                  ),
+                  
+                  ####################################################################################
+                  # New box
+                  box(title= textOutput('results'),width=6, status = "success", solidHeader= TRUE,
+                      uiOutput("DisplayMapButton"),
+                      plotOutput("display_res"),
+                      uiOutput("ui_download_gfc_map")
+                  )
+                  ####################################################################################
+                  # End of the Box
+                  
+                )
+                ####################################################################################
+                # End of the fluid row
+                
+        )
+        ####################################################################################
+        # End of the tabItem 
       )
       ####################################################################################
       # End of the tabItem list

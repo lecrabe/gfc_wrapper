@@ -9,9 +9,9 @@
 ############################ TITLES
 output$title    <- reactive({  "Base forest map" })
 
-output$t0_title <- reactive({  "Introduction" })
-output$t1_title <- reactive({  "Map input" })
-output$t2_title <- reactive({  "Strata areas" })
+output$t0_title <- reactive({  "Introduction to GFC" })
+output$t1_title <- reactive({  "Define area of interest" })
+output$t2_title <- reactive({  "Generate forest change mask" })
 output$t3_title <- reactive({  "Strata selection" })
 output$t4_title <- reactive({  "Sampling size" })
 output$t5_title <- reactive({  "Sample allocation" })
@@ -20,12 +20,13 @@ output$source_code <- reactive({  "Source code" })
 output$bug_reports <- reactive({  "Bug reports" })
 
 ############################ BUTTONS
-output$download_testdata_button <- reactive({"Download test dataset"})
+output$download_stats_button <- reactive({"Download areas (CSV)"})
 output$download_area_button     <- reactive({"Download area file"})
 output$download_sampling_button <- reactive({'Download csv with sample design'})
 output$download_ceo_button      <- reactive({"Download as Collect Earth Online project (.csv)"})
 output$download_cep_button      <- reactive({"Download as Collect Earth project (.cep)"})
 output$download_csv_button      <- reactive({'Download as tabular data (.csv)'})
+output$download_map_button      <- reactive({'Download as GeoTiff data (.tif)'})
 output$download_shp_button      <- reactive({'Download as vector data (.shp)'})
 
 output$t2_b1_button        <- reactive({"Input map raster or vector format"})
@@ -33,13 +34,13 @@ output$t3_b1_button        <- reactive({'Area calculation and legend generation'
 output$t3_b3_button        <- reactive({"Submit legend"})
 output$t6_b1_button        <- reactive({"Generate sampling points"})
 
-output$aoi_type_choice        <- reactive({'Your AOI is:'})
+output$aoi_type_choice        <- reactive({'Define your area of interest with:'})
 output$text_choice_country        <- reactive({'Choose country name'})
 output$text_choice_threshold      <- reactive({'Choose canopy cover threshold'})
 output$process_button             <- reactive({"Download GFC data, merge tiles, clip to boundaries, generate map"})
 output$map_button               <- reactive({"Generate map"})
 output$display_map_button       <- reactive({"Display map"})
-output$stat_button              <- reactive({"Compute pixel counts"})
+output$stat_button              <- reactive({"Process"})
 
 output$t6_b2_button1_field <- reactive({'Please select a country from the list below'})  
 output$t6_b2_button2       <- reactive({'Number of operators'})
@@ -100,14 +101,19 @@ output$t1_b1_body  <- reactive({
 ############################ INTRODUCTION TAB - BOX 2
 output$t1_b2_title <- reactive({"Background"})
 
-output$t1_b2_body  <- reactive({
+output$gfc_background  <- reactive({
   HTML(paste0(
-    "The aim of this stratified sampling design tool is to produce a sampling design that can be used for area estimates. <br/>
-The idea is to combine a map (used as a stratification of the landscape of interest) with a visual map interpretation of samples to produce an area estimation. <br/>
+"This application allows the use to define an area of interest and retrieve data from the Global Forest Change dataset (Hansen et al. 2013). <br/>
+
+GFC provides global layers of information on tree cover and tree cover change since 2000, at 30m spatial resolution and consists of: <br/>
+- Tree canopy cover for the year 2000 (treecover2000) <br/>
+- Global forest cover gain 2000–2012 (gain) <br/>
+- Year of gross forest cover loss event (lossyear) <br/>
 <br/>
-The concept is derived from map accuracy assessment principles: 
-characterized frequency of errors (omission and commission) for each map class may be used to compute area estimates and also to estimate the uncertainties (confidence intervals) for the areas for each class."
-    ))})
+Hansen, M. C., P. V. Potapov, R. Moore, M. Hancher, S. A. Turubanova, A. Tyukavina, D. Thau, S. V. Stehman, S. J. Goetz, T. R. Loveland, A. Kommareddy, A. Egorov, L. Chini, C. O. Justice, and J. R. G. Townshend. 2013. “High-Resolution Global Maps of 21st-Century Forest Cover Change.” Science 342 (15 November): 850–53. <br/>
+<br/>
+The data is ", a(href="http://earthenginepartners.appspot.com/science-2013-global-forest","available on-line."))
+    )})
 
 ############################ INTRODUCTION TAB - BOX 3
 output$t1_b3_title <- reactive({"How to use the tool ?"})
@@ -125,9 +131,9 @@ output$t1_b3_body  <- reactive({
 })
 
 ############################ INTRODUCTION TAB - BOX 4
-output$t1_b4_p1_title <- reactive({"Disclaimer"})
+output$title_disclaimer <- reactive({"Disclaimer"})
 
-output$t1_b4_p1_body  <- reactive({
+output$body_disclaimer  <- reactive({
   HTML(paste0(
     "FAO declines all responsibility for errors or deficiencies in the database 
     or software or in the documentation accompanying it for program maintenance and 

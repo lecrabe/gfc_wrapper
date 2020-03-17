@@ -1,4 +1,4 @@
-aoi_name   <- paste0(aoi_dir,"aoi_",countrycode)
+aoi_name   <- paste0(aoi_dir,the_basename)
 aoi_shp    <- paste0(aoi_name,".shp")
 aoi_field <-  "id_aoi"
 
