@@ -12,7 +12,8 @@ packages <- function(x){
 
 ## Packages to download GFC data
 packages(devtools)
-install_github('yfinegold/gfcanalysis')
+dir.create(normalizePath("~/.R/library"),recursive = T,showWarnings = F)
+install_github('yfinegold/gfcanalysis',subdir=normalizePath("~/.R/library"))
 library(gfcanalysis)
 
 ## Packages for geospatial data handling
