@@ -27,6 +27,7 @@ output$title_param_mspa <- reactive({"Parameters"})
 ############################ BUTTONS
 output$download_csv_button      <- reactive({'Download as tabular data (.csv)'})
 output$download_map_button      <- reactive({'Download as GeoTiff data (.tif)'})
+output$download_mspa_button     <- reactive({'Download as GeoTiff data (.tif)'})
 
 output$mspa_start_button   <- reactive({"Start the fragmentation calculation"})
 output$t2_b1_button        <- reactive({"Input map raster or vector format"})

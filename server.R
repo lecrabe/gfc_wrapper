@@ -135,7 +135,7 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Insert the leaflet
   output$leafmap <- renderLeaflet({
-    validate(need(the_basename(), "define the area of interest"))
+    #validate(need(the_basename(), "define the area of interest"))
     req(input$aoi_type == "draw")
     
     leaflet() %>%
@@ -509,7 +509,7 @@ shinyServer(function(input, output, session) {
     downloadButton('download_gfc_map',
                    label = textOutput('download_map_button'))
   })
-  
+
   ##################################################################################################################################
   ############### Enable to download the map (.tif)
   output$download_gfc_map <- downloadHandler(
@@ -521,6 +521,11 @@ shinyServer(function(input, output, session) {
       writeRaster(to_export, xx)
     }
   )
+  
+  
+  
+
+
   
   
   ##################################################################################################################################
@@ -621,7 +626,12 @@ shinyServer(function(input, output, session) {
                                         overwrite = T)
                               }
                               
-                              raster(paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,".tif"))
+                              system(sprintf("gdal_translate -a_srs \"%s\" %s %s",
+                                             proj,
+                                             paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,".tif"),
+                                             paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,"_proj.tif")))
+                              
+                              raster(paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,"_proj.tif"))
                             })
   
   
@@ -665,6 +675,28 @@ shinyServer(function(input, output, session) {
     out
   })
   
+  
+  
+  ##################################################################################################################################
+  ############### Button to download the tif file
+  output$ui_download_mspa <- renderUI({
+    req(fmask())
+    #req(input$DisplayMapButton)
+    downloadButton('download_mspa_map',
+                   label = textOutput('download_mspa_button'))
+  })
+  
+  ##################################################################################################################################
+  ############### Enable to download the map (.tif)
+  output$download_mspa_map <- downloadHandler(
+    filename = function() {
+      paste0("mspa_",the_basename(),"_",input$threshold,"_",parameters_u(),".tif")
+    },
+    content  = function(xx) {
+      to_export <- raster(paste0(msp_dir,"mspa_",the_basename(),"_",input$threshold,"_",parameters_u(),"_proj.tif"))
+      writeRaster(to_export, xx)
+    }
+  )
   ##################################################################################################################################
   ############### Turn off progress bar
   
