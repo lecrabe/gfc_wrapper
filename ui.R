@@ -29,6 +29,7 @@ source("scripts/packages.R",  echo = TRUE)
 source("scripts/app_config.R",echo = TRUE)
 
 
+
 ####################################################################################
 ####### Start User Interface
 
@@ -48,9 +49,13 @@ shinyUI(
     dashboardSidebar(
       width = 350,
       sidebarMenu(
-        menuItem(textOutput('t0_title',inline=T), tabName = "intro_tab", icon = icon("dashboard")),
-        menuItem(textOutput('t1_title',inline=T), tabName = "aoi_tab", icon = icon("dashboard")),
-        menuItem(textOutput('t2_title',inline=T), tabName = "mask_tab", icon = icon("dashboard")),
+        
+        menuItem(textOutput('t0_title',inline=T), tabName = "intro_tab", icon = icon("history")),
+        menuItem(textOutput('t1_title',inline=T), tabName = "aoi_tab",   icon = icon("fas fa-globe-africa")),
+        menuItem(textOutput('t2_title',inline=T), tabName = "mask_tab",  icon = icon("cog", lib = "glyphicon")),
+        menuItem(textOutput('t3_title',inline=T), tabName = "mspa_tab",  icon = icon("dashboard")),
+        
+        
         hr(),
         br(),
         br(),
@@ -63,10 +68,14 @@ shinyUI(
     #######       Body structure of the Dashboard: tabItems   ##########################
     dashboardBody(
       tabItems(
+        
+        
+        
         ####################################################################################
         # New Tab
         tabItem(tabName = "intro_tab",
                 fluidRow(
+                  
                   # ####################################################################################
                   # Change style of the CSS style of the tabBox, making the color green
                   tags$style(".nav-tabs-custom .nav-tabs li.active {border-top-color: #00994d;}"),
@@ -77,141 +86,228 @@ shinyUI(
                   ####################################################################################
                   # New box
                   box(
-                    title= textOutput('t1_b0_title'), width=3,status = "success", solidHeader= TRUE,
-                    selectInput(
-                      'language','',choices = c("English")),
-                    uiOutput("chosen_language")
-                  ),
-                  # End of Box
-                  
-                  ####################################################################################
-                  # New box
-                  box(
-                    title= textOutput('t1_b2_title'), width=9,status = "success", solidHeader= TRUE,
-                    htmlOutput('gfc_background')
+                    title= textOutput('t1_b1_title'), width=12,status = "success", solidHeader= TRUE,
+                    
+                    tabBox(width=12,
+                           # tabPanel(textOutput('welcome_title'),
+                           #          htmlOutput('welcome_message')
+                           # ),
+                           tabPanel(textOutput('t1_b0_title'),
+                                    selectInput(
+                                      'language','',choices = c("English")),
+                                    uiOutput("chosen_language")                                 
+                                    # end tabPanel
+                           ),
+                           
+                           tabPanel(title= textOutput('t1_b2_title'), 
+                                    htmlOutput('gfc_background')
+                                    
+                                    # end tabPanel
+                           )
+                    )
+                    
                   )
-                  # End of Box
+                    # End of Box
+                   
+                    
+                  ),
+                  ####################################################################################
+                  # End of the fluid row
+                  
+                  
+                  fluidRow(
+                    ####################################################################################
+                    # New box
+                    box(title=textOutput('title_disclaimer'),width=12,status = "success", solidHeader= TRUE,
+                        br(),
+                        htmlOutput('body_disclaimer'),
+                        br(),
+                        br(),
+                        img(src="thumbnails/sepal-logo-EN-white.jpg", height = 100, width = 210),
+                        img(src="thumbnails/UNREDD_LOGO_COLOUR.jpg",  height = 80,  width = 100),
+                        img(src="thumbnails/Open-foris-Logo160.jpg",  height = 70,  width = 70),
+                        br()
+                    )
+                    ####################################################################################
+                    # End of the Box
+                    
+                  )
+                  ####################################################################################
+                  # End of the fluid row
                   
                 ),
                 ####################################################################################
-                # End of the fluid row
+                # End of the tabItem 
+                
+                ####################################################################################
+                # New Tab
+                tabItem(tabName = "aoi_tab",
+                        fluidRow(
+                          
+                          ####################################################################################
+                          # New box
+                          box(
+                            title= textOutput('title_aoi'), width=9,status="success" , solidHeader= TRUE,
+                            htmlOutput('body_description'),
+                            
+                            selectInput('aoi_type',
+                                        textOutput('aoi_type_choice'),
+                                        choices=setNames(c("draw","gadm","custom"), 
+                                                         c("Draw a shape",
+                                                           "Country boundaries",
+                                                           "Select file"
+                                                         ))
+                            ),
+                            
+                            uiOutput("aoi_select_gadm"),
+                            uiOutput("aoi_select_custom"),
+                            textOutput('aoi_message_ui'),
+                            
+                            sliderInput('threshold',
+                                        textOutput('text_choice_threshold'),
+                                        min = 0,
+                                        max=100,
+                                        step = 5,
+                                        value=30
+                            ),
+                            
+                            leafletOutput("leafmap")
+                            
+                          )
+                          ####################################################################################
+                          # End of the Box
+                          
+                        )
+                        ####################################################################################
+                        # End of the fluid row
+                        
+                ),
+                ####################################################################################
+                # End of the tabItem 
                 
                 
-                fluidRow(
-                  ####################################################################################
-                  # New box
-                  box(title=textOutput('title_disclaimer'),width=12,status = "success", solidHeader= TRUE,
-                      br(),
-                      htmlOutput('body_disclaimer'),
-                      br(),
-                      br(),
-                      img(src="thumbnails/sepal-logo-EN-white.jpg", height = 100, width = 210),
-                      img(src="thumbnails/UNREDD_LOGO_COLOUR.jpg",  height = 80,  width = 100),
-                      img(src="thumbnails/Open-foris-Logo160.jpg",  height = 70,  width = 70),
-                      br()
-                  )
-                  ####################################################################################
-                  # End of the Box
-                  
+                ####################################################################################
+                # New Tab
+                tabItem(tabName = "mask_tab",
+                        
+                        fluidRow(
+                          ####################################################################################
+                          # New box
+                          box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
+                              #uiOutput("ProcessButton"),
+                              uiOutput("StatButton"),
+                              tableOutput("display_stats"),
+                              plotOutput("display_loss_graph"),
+                              uiOutput("ui_download_stats")
+                          ),
+                          
+                          ####################################################################################
+                          # New box
+                          box(title= textOutput('title_results'),width=6, status = "success", solidHeader= TRUE,
+                              #uiOutput("DisplayMapButton"),
+                              plotOutput("display_res"),
+                              uiOutput("ui_download_gfc_map")
+                          )
+                          ####################################################################################
+                          # End of the Box
+                          
+                        )
+                        ####################################################################################
+                        # End of the fluid row
+                        
+                ),
+                ####################################################################################
+                # End of the tabItem 
+                
+                ####################################################################################
+                # New Tab
+                tabItem(tabName = "mspa_tab",
+                        
+                        fluidRow(
+                          
+                          ####################################################################################
+                          # New box
+                          
+                          box(title= textOutput('title_param_mspa'),width=6, status = "success", solidHeader= TRUE,
+                              htmlOutput('body_opt_dir'),
+                              selectInput(inputId = 'option_FGconn',
+                                          label = "Foreground connectivity",
+                                          choices = c(4,8),
+                                          multiple = FALSE,
+                                          selected = 8
+                              ),
+                              selectInput(inputId = 'option_EdgeWidth',
+                                          label = "Edge Width",
+                                          choices = 1:100,
+                                          multiple = FALSE,
+                                          selected = 1
+                              ),
+                              selectInput(inputId = 'option_Transition',
+                                          label = "Transition Core - Loop/Bridge",
+                                          choices = setNames(c(0,1),c("No","Yes")),
+                                          multiple = FALSE,
+                                          selected = 1
+                              ),
+                              selectInput(inputId = 'option_Intext',
+                                          label = "Separate internal from external features ?",
+                                          choices = setNames(c(0,1),c("No","Yes")),
+                                          multiple = FALSE,
+                                          selected = 1
+                              ),
+                              selectInput(inputId = 'option_dostats',
+                                          label = "Compute statistics ?",
+                                          choices = setNames(c(0,1),c("No","Yes")),
+                                          multiple = FALSE,
+                                          selected = 1
+                              ),
+                              
+                              
+                              textOutput("parameterSummary")
+                              
+                          )
+                          
+                          
+                          # End of Box
+                          ####################################################################################
+                          
+                          ,
+                          
+                          ####################################################################################
+                          # New box
+                          
+                          box(title= textOutput('title_mspa'),width=6, status = "success", solidHeader= TRUE,
+                              uiOutput("mspaStartButton"),
+                              plotOutput("display_mspa"),
+                              tableOutput("mspa_summary"),
+                              uiOutput("ui_download_mspa")
+                          )
+                          
+                          # End of Box
+                          ####################################################################################
+                          
+                          
+                          
+                          
+                        )
+                        ####################################################################################
+                        # End of the fluid row
+                        
                 )
                 ####################################################################################
-                # End of the fluid row
-                
-        ),
-        ####################################################################################
-        # End of the tabItem 
-        
-        ####################################################################################
-        # New Tab
-        tabItem(tabName = "aoi_tab",
-                fluidRow(
-                 
-                  ####################################################################################
-                  # New box
-                  box(
-                    title= textOutput('title_description'), width=9,status="success" , solidHeader= TRUE,
-                    htmlOutput('body_description'),
-                    
-                    selectInput('aoi_type',
-                                textOutput('aoi_type_choice'),
-                                choices=setNames(c("draw","gadm","custom"), 
-                                                 c("Draw a shape",
-                                                   "Country boundaries",
-                                                   "Select file"
-                                                 ))
-                    ),
-                    
-                    uiOutput("aoi_select_gadm"),
-                    uiOutput("aoi_select_custom"),
-                    textOutput('aoi_message_ui'),
-                    
-                    sliderInput('threshold',
-                                textOutput('text_choice_threshold'),
-                                min = 0,
-                                max=100,
-                                step = 5,
-                                value=30
-                    ),
-                    
-                    leafletOutput("leafmap")
-                    
-                  )
-                  ####################################################################################
-                  # End of the Box
-                  
-                )
-                ####################################################################################
-                # End of the fluid row
-                
-        ),
-        ####################################################################################
-        # End of the tabItem 
-        
-        
-        ####################################################################################
-        # New Tab
-        tabItem(tabName = "mask_tab",
-                
-                fluidRow(
-                  ####################################################################################
-                  # New box
-                  box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
-                      #uiOutput("ProcessButton"),
-                      uiOutput("StatButton"),
-                      tableOutput("display_stats"),
-                      plotOutput("display_loss_graph"),
-                      uiOutput("ui_download_stats")
-                  ),
-                  
-                  ####################################################################################
-                  # New box
-                  box(title= textOutput('results'),width=6, status = "success", solidHeader= TRUE,
-                      uiOutput("DisplayMapButton"),
-                      plotOutput("display_res"),
-                      uiOutput("ui_download_gfc_map")
-                  )
-                  ####################################################################################
-                  # End of the Box
-                  
-                )
-                ####################################################################################
-                # End of the fluid row
+                # End of the tabItem 
                 
         )
         ####################################################################################
-        # End of the tabItem 
+        # End of the tabItem list
+        
       )
       ####################################################################################
-      # End of the tabItem list
+      # End of the Dashboard Body
       
     )
     ####################################################################################
-    # End of the Dashboard Body
+    # End of the Dashboard Page 
     
   )
   ####################################################################################
-  # End of the Dashboard Page 
-  
-)
-####################################################################################
-# End of the User Interface
+  # End of the User Interface

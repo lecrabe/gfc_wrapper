@@ -135,6 +135,7 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Insert the leaflet
   output$leafmap <- renderLeaflet({
+    validate(need(the_basename(), "define the area of interest"))
     req(input$aoi_type == "draw")
     
     leaflet() %>%
@@ -148,37 +149,7 @@ shinyServer(function(input, output, session) {
         singleFeature = T)
   })
   
-  # # Start of Drawing
-  # observeEvent(input$leafmap_draw_start, {
-  #   print("Start of drawing")
-  #   print(input$leafmap_draw_start)
-  # })
-  # 
-  # # Stop of Drawing
-  # observeEvent(input$leafmap_draw_stop, {
-  #   print("Stopped drawing")
-  #   print(input$leafmap_draw_stop)
-  # })
-  # 
-  # # New Feature
-  # observeEvent(input$leafmap_draw_new_feature, {
-  #   print("New Feature")
-  #   print(input$leafmap_draw_new_feature)
-  # })
-  # 
-  # # Edited Features
-  # observeEvent(input$leafmap_draw_edited_features, {
-  #   print("Edited Features")
-  #   print(input$leafmap_draw_edited_features)
-  # })
-  # 
-  # # Deleted features
-  # observeEvent(input$leafmap_draw_deleted_features, {
-  #   print("Deleted Features")
-  #   print(input$leafmap_draw_deleted_features)
-  # })
-  
-  # Listen for draw_all_features which is called anytime features are created/edited/deleted from the map
+    # Listen for draw_all_features which is called anytime features are created/edited/deleted from the map
   observeEvent(input$leafmap_draw_all_features, {
     print("All Features")
     print(input$leafmap_draw_all_features)
@@ -262,7 +233,8 @@ shinyServer(function(input, output, session) {
     }
     
     if(input$aoi_type == "draw"){
-      file_info   <- drawn()$features[[1]]$properties$feature_type
+      file_info   <- paste0(drawn()$features[[1]]$properties$feature_type," ",
+                            drawn()$features[[1]]$properties$`_leaflet_id`)
     }
     
     file_info
@@ -281,6 +253,7 @@ shinyServer(function(input, output, session) {
   ############### Insert the START button
   output$ProcessButton <- renderUI({
     req(input$aoi_type)
+    validate(need(the_basename(), "Define the area of interest"))
     actionButton('ProcessButton', textOutput('process_button'))
   })
   
@@ -288,6 +261,7 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Insert the DISPLAY MAP button
   output$DisplayMapButton <- renderUI({
+    validate(need(the_basename(), "Define the area of interest"))
     req(input$aoi_type)
     actionButton('DisplayMapButton', textOutput('display_map_button'))
   })
@@ -296,6 +270,7 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Insert the STATISTICS button
   output$StatButton <- renderUI({
+    validate(need(the_basename(), "Define the area of interest"))
     req(input$aoi_type)
     actionButton('StatsCalc', textOutput('stat_button'))
   })
@@ -329,7 +304,7 @@ shinyServer(function(input, output, session) {
   make_aoi <- reactive({
     req(input$aoi_type)
     req(the_basename())
-    
+    validate(need(the_basename(), "Define the area of interest"))
     the_basename <- the_basename()
     
     if(input$aoi_type == "custom"){
@@ -353,13 +328,12 @@ shinyServer(function(input, output, session) {
   
   
   ##################################################################################################################################
-  ############### DOWNLOAD DATA
+  ############### PROCESSING CHAIN
   process <- eventReactive(input$StatsCalc,
                            {
                              req(input$StatsCalc)
                              req(input$aoi_type)
-                             
-                             req(make_aoi())
+                             validate(need(the_basename(), "Define the area of interest"))
                              
                              threshold    <- input$threshold
                              the_basename <- the_basename()
@@ -375,10 +349,11 @@ shinyServer(function(input, output, session) {
                              #system(paste0('echo "Preparing data..." > ', progress_file))
                              
                              
-                             withProgress(message = paste0('Downloading GFC data'),
+                             withProgress(message = paste0('Download GFC data'),
                                           value = 0,
                                           {if(!file.exists(paste0(gfc_dir,"gfc_",the_basename,"_",types[4],".tif"))){
                                             source("scripts/b1_download_merge.R",  local=T, echo = TRUE)
+                                            incProgress(.25)
                                           }
                                           })
                              
@@ -388,7 +363,8 @@ shinyServer(function(input, output, session) {
                                           value = 0,{
                                             if(!file.exists(paste0(gfc_dir,"gfc_",the_basename,"_",threshold,"_map_clip_pct.tif"))){
                                               source("scripts/b2_make_map_threshold.R",  local=T,echo = TRUE)
-                                              
+                                              setProgress(.25)
+                                              incProgress(.25)
                                             }
                                           })
                              
@@ -397,6 +373,8 @@ shinyServer(function(input, output, session) {
                                           value = 0,{
                                             if(!file.exists(paste0(stt_dir,"stats_",the_basename,"_",threshold,".txt"))){
                                               source("scripts/b3_compute_areas.R",  local=T,echo = TRUE)
+                                              setProgress(.5)
+                                              incProgress(.25)
                                             }
                                           })
                              
@@ -405,11 +383,26 @@ shinyServer(function(input, output, session) {
                                           value = 0,{
                                             if(!file.exists(paste0(gfc_dir,"mask_mspa_gfc_",the_basename,"_",threshold,".tif"))){
                                               source("scripts/b4_make_mspa_ready_mask.R",  local=T,echo = TRUE)
+                                              setProgress(.75)
+                                              incProgress(.25)
                                             }
                                           })
                              
                              list.files(gfc_dir)
                            })
+  
+  ############# Define the forest mask as a reactive
+  fmask <- reactive({
+    req(process())
+    paste0(gfc_dir,"gfc_",the_basename(),"_",input$threshold,"_map_clip_pct.tif")
+    })
+  
+  
+  ############# Define the forest mask as a reactive
+  fmask_geo <- reactive({
+    req(process())
+    paste0(gfc_dir,"gfc_",the_basename(),"_",input$threshold,"_map_clip_pct_geo.tif")
+  })
   
   ############# Create the raw statistics table
   raw_stats <- reactive({
@@ -471,15 +464,16 @@ shinyServer(function(input, output, session) {
   
   ############### Display the results as map
   output$display_res <- renderPlot({
-    req(input$DisplayMapButton)
+    #req(input$DisplayMapButton)
     
     threshold   <- input$threshold
     the_basename <- the_basename()
     
     print('Check: Display the map')
     
-    gfc <- raster(paste0(gfc_dir,"gfc_",the_basename,"_",threshold,"_map_clip_pct.tif"))
-    aoi <- spTransform(readOGR(make_aoi()),proj4string(gfc))
+    gfc <- raster(fmask_geo())
+    # aoi <- spTransform(readOGR(make_aoi()),proj4string(gfc))
+    aoi <- readOGR(make_aoi())
     
     plot(gfc)
     plot(aoi,add=T,border="yellow")
@@ -510,11 +504,12 @@ shinyServer(function(input, output, session) {
   ##################################################################################################################################
   ############### Button to download the tif file
   output$ui_download_gfc_map <- renderUI({
-    req(process())
-    req(input$DisplayMapButton)
+    req(fmask())
+    #req(input$DisplayMapButton)
     downloadButton('download_gfc_map',
                    label = textOutput('download_map_button'))
   })
+  
   ##################################################################################################################################
   ############### Enable to download the map (.tif)
   output$download_gfc_map <- downloadHandler(
@@ -526,6 +521,149 @@ shinyServer(function(input, output, session) {
       writeRaster(to_export, xx)
     }
   )
+  
+  
+  ##################################################################################################################################
+  ############### Parameters title as a reactive
+  parameters <- reactive({
+    req(process())
+    
+    mspa1 <- as.numeric(input$option_FGconn)
+    mspa2 <- as.numeric(input$option_EdgeWidth)
+    mspa3 <- as.numeric(input$option_Transition)
+    mspa4 <- as.numeric(input$option_Intext)
+    mspa5 <- as.numeric(input$option_dostats)
+    
+    paste(mspa1,mspa2,mspa3,mspa4,mspa5,sep=" ")
+    
+  })
+  
+  ##################################################################################################################################
+  ############### Parameters suffix as a reactive
+  parameters_u <- reactive({
+    req(process())
+    
+    mspa1 <- as.numeric(input$option_FGconn)
+    mspa2 <- as.numeric(input$option_EdgeWidth)
+    mspa3 <- as.numeric(input$option_Transition)
+    mspa4 <- as.numeric(input$option_Intext)
+    mspa5 <- as.numeric(input$option_dostats)
+    
+    paste(mspa1,mspa2,mspa3,mspa4,sep="_")
+    
+  })
+  
+  
+  ##################################################################################################################################
+  ############### MSPA start button
+  output$mspaStartButton <- renderUI({
+    req(process())
+    actionButton('mspaStartButton', textOutput('mspa_start_button'))
+  })
+  
+  
+  ##################################################################################################################################
+  ############### Run MSPA
+  mspa_res <- eventReactive(input$mspaStartButton,
+                            {
+                              req(process())
+                              req(input$mspaStartButton)
+                              req(the_basename())
+                              
+                              the_basename <- the_basename()
+                              parameters   <- parameters()
+                              parameters_u <- parameters_u()
+                              threshold    <- input$threshold
+                              
+                              time_start   <- Sys.time()
+                              if(!file.exists(paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,".tif"))){
+                              
+                                file.copy(paste0(scriptdir,"MSPA/"),
+                                        tmp_dir,
+                                        recursive = T,
+                                        overwrite = T)
+                              
+                              dir.create(paste0(tmp_dir,"MSPA/input/"), showWarnings = F)
+                              dir.create(paste0(tmp_dir,"MSPA/output/"),showWarnings = F)
+                              dir.create(paste0(tmp_dir,"MSPA/tmp/"),   showWarnings = F)
+                              
+                              file.copy(paste0(gfc_dir,"mask_mspa_gfc_",the_basename,"_",threshold,".tif"),
+                                        paste0(tmp_dir,"MSPA/input/input.tif"),overwrite = T)
+                              
+                              write(parameters,paste0(tmp_dir,"MSPA/input/mspa-parameters.txt"))
+                              
+                              system(sprintf("chmod 755 %s/mspa_lin64",
+                                             paste0(tmp_dir,"MSPA")
+                                             ))
+                              
+                              print("have a break")
+                              
+                              withProgress(message = paste0('Processing MSPA for ',the_basename),
+                                           value = 0,
+                                           {
+                                             setwd(paste0(tmp_dir,"MSPA"))
+                                             system(sprintf("bash %s/sepal_mspa",
+                                                            paste0(tmp_dir,"MSPA")
+                                                            ))
+                                             setwd(rootdir)
+                                           })
+                              
+                              process_time <- Sys.time() - time_start
+                              
+                              write(process_time,paste0(tmp_dir,"MSPA/output/mspa-process.txt"))
+                              
+                              file.copy(paste0(tmp_dir,"MSPA/output/input_",parameters_u,".tif"),
+                                        paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,".tif"),
+                                        overwrite = T)
+                              
+                              file.copy(paste0(tmp_dir,"MSPA/output/input_",parameters_u,"_stat.txt"),
+                                        paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,"_stat.txt"),
+                                        overwrite = T)
+                              }
+                              
+                              raster(paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,".tif"))
+                            })
+  
+  
+  
+  ############### Display the results as map
+  output$display_mspa <- renderPlot({
+    req(mspa_res())
+    print('Check: Display the map')
+    mspa_res <- mspa_res()
+    plot(mspa_res, axes = FALSE)
+  })
+  
+  ##################################################################################################################################
+  ############### Display parameters
+  output$parameterSummary <- renderText({
+    req(parameters())
+    print(paste0("Parameters are : ",parameters()))
+  })
+  
+  ##################################################################################################################################
+  ############### Display time
+  output$mspa_summary <- renderTable({
+    req(mspa_res())
+    
+    the_basename <- the_basename()
+    parameters   <- parameters()
+    parameters_u <- parameters_u()
+    threshold    <- input$threshold
+    
+    time <- readLines(paste0(tmp_dir,"MSPA/output/mspa-process.txt"))
+    res  <- readLines(paste0(msp_dir,"mspa_",the_basename,"_",threshold,"_",parameters_u,"_stat.txt"))
+    info <- res[11:15]
+    table <- data.frame(cbind(str_split_fixed(info," : ",2)[,1],
+                   str_split_fixed(str_split_fixed(info," : ",2)[,2]," ",2)[,1]))
+    names(table) <- c("class","pix")
+    pix <- res(raster(paste0(gfc_dir,"gfc_",the_basename,"_",threshold,"_map_clip_pct.tif")))[1]
+    table$area <- as.numeric(table$pix) * pix * pix / 10000
+    table$percent <- table$area/sum(table[1:4,]$area)*100
+    out <- table[,c("class","area","percent")]
+    names(out) <- c("Class","Area (ha)","Weight (%)")
+    out
+  })
   
   ##################################################################################################################################
   ############### Turn off progress bar
