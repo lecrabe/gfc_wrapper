@@ -29,7 +29,6 @@ source("scripts/packages.R",  echo = TRUE)
 source("scripts/app_config.R",echo = TRUE)
 
 
-
 ####################################################################################
 ####### Start User Interface
 
@@ -50,12 +49,11 @@ shinyUI(
       width = 350,
       sidebarMenu(
         
-        menuItem(textOutput('t0_title',inline=T), tabName = "intro_tab", icon = icon("history")),
+        
         menuItem(textOutput('t1_title',inline=T), tabName = "aoi_tab",   icon = icon("fas fa-globe-africa")),
         menuItem(textOutput('t2_title',inline=T), tabName = "mask_tab",  icon = icon("cog", lib = "glyphicon")),
         menuItem(textOutput('t3_title',inline=T), tabName = "mspa_tab",  icon = icon("dashboard")),
-        
-        
+        menuItem(textOutput('t0_title',inline=T), tabName = "intro_tab", icon = icon("question")),
         hr(),
         br(),
         br(),
@@ -68,8 +66,6 @@ shinyUI(
     #######       Body structure of the Dashboard: tabItems   ##########################
     dashboardBody(
       tabItems(
-        
-        
         
         ####################################################################################
         # New Tab
@@ -88,22 +84,29 @@ shinyUI(
                   box(
                     title= textOutput('t1_b1_title'), width=12,status = "success", solidHeader= TRUE,
                     
-                    tabBox(width=12,
-                           # tabPanel(textOutput('welcome_title'),
-                           #          htmlOutput('welcome_message')
-                           # ),
-                           tabPanel(textOutput('t1_b0_title'),
-                                    selectInput(
-                                      'language','',choices = c("English")),
-                                    uiOutput("chosen_language")                                 
-                                    # end tabPanel
+                    tabsetPanel(
+                           tabPanel(title= textOutput('overview_title'),
+                                    #uiOutput("chosen_language")   ,
+                                    htmlOutput('overview_body')
                            ),
-                           
-                           tabPanel(title= textOutput('t1_b2_title'), 
-                                    htmlOutput('gfc_background')
+
+                           tabPanel(textOutput('language_title'),
+                                    selectInput(
+                                      'language','',choices = c("English"))
+                                                                  
                                     
-                                    # end tabPanel
-                           )
+                           ),  # end tabPanel
+                           
+                           tabPanel(title= textOutput('gfc_back_title'), 
+                                    htmlOutput('gfc_background') 
+                                    
+                           ),  # end tabPanel
+                           
+                           tabPanel(title= textOutput('mspa_back_title'), 
+                                    htmlOutput('mspa_background'),
+                                    img(src="thumbnails/mspa.jpg", height = 355, width = 623)
+                                    
+                           )  # end tabPanel
                     )
                     
                   )
@@ -148,6 +151,7 @@ shinyUI(
                           # New box
                           box(
                             title= textOutput('title_aoi'), width=9,status="success" , solidHeader= TRUE,
+                            uiOutput("chosen_language")   ,
                             htmlOutput('body_description'),
                             
                             selectInput('aoi_type',
@@ -195,7 +199,7 @@ shinyUI(
                           # New box
                           box(title=textOutput('title_process'),width=6,status = "success", solidHeader= TRUE,
                               #uiOutput("ProcessButton"),
-                              uiOutput("StatButton"),
+                              uiOutput("runGFCButton"),
                               tableOutput("display_stats"),
                               plotOutput("display_loss_graph"),
                               uiOutput("ui_download_stats")

@@ -88,7 +88,7 @@ shinyServer(function(input, output, session) {
     req(input$aoi_type == "custom")
     
     shinyFilesButton(id = 'aoi_custom_file',
-                     label = "Area of interest",  #htmlOutput('t2_b1_button'), TO TRY TO IMPLEMENT
+                     label =   "Area of interest", #TO TRY TO IMPLEMENT
                      title = "Browse", #htmlOutput('select_a_file'),
                      multiple = FALSE)
     
@@ -130,7 +130,6 @@ shinyServer(function(input, output, session) {
       )
     )
   })
-  
   
   ##################################################################################################################################
   ############### Insert the leaflet
@@ -269,10 +268,10 @@ shinyServer(function(input, output, session) {
   
   ##################################################################################################################################
   ############### Insert the STATISTICS button
-  output$StatButton <- renderUI({
+  output$runGFCButton <- renderUI({
     validate(need(the_basename(), "Define the area of interest"))
     req(input$aoi_type)
-    actionButton('StatsCalc', textOutput('stat_button'))
+    actionButton('runGFC', textOutput('gfc_start_button'))
   })
   
   ##################################################################################################################################
@@ -329,9 +328,9 @@ shinyServer(function(input, output, session) {
   
   ##################################################################################################################################
   ############### PROCESSING CHAIN
-  process <- eventReactive(input$StatsCalc,
+  process <- eventReactive(input$runGFC,
                            {
-                             req(input$StatsCalc)
+                             req(input$runGFC)
                              req(input$aoi_type)
                              validate(need(the_basename(), "Define the area of interest"))
                              
@@ -406,7 +405,7 @@ shinyServer(function(input, output, session) {
   
   ############# Create the raw statistics table
   raw_stats <- reactive({
-    req(input$StatsCalc)
+    req(input$runGFC)
     req(process())
     threshold   <- input$threshold
     the_basename <- the_basename()
